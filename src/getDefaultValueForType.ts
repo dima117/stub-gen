@@ -1,4 +1,6 @@
 import { SyntaxKind, Type, TypeNode } from "ts-morph";
+import { getFunctionName, getSymbolName } from "./names";
+import { NAME_PREFIX } from "./const";
 
 type SimpleValue = string | number | boolean;
 
@@ -34,6 +36,7 @@ const getDefaultValueFromSettings = (
 };
 
 export function getDefaultValueForType(
+  allExportedNames: Set<string>,
   fieldName: string,
   type: Type,
   typeNode?: TypeNode
@@ -49,10 +52,16 @@ export function getDefaultValueForType(
   } else if (type.isBoolean()) {
     if (resolved && typeof resolved.value !== "boolean") throw new Error();
     return JSON.stringify(resolved?.value || false);
+  } else if (type.isInterface() || type.isObject()) {
+    const name = getSymbolName(type);
+
+    if (name && allExportedNames.has(name)) {
+      return `${getFunctionName(name)}()`;
+    }
+
+    return "{}";
   } else if (type.isArray()) {
     return "[]";
-  } else if (type.isObject() && !type.isInterface()) {
-    return "{}";
   } else if (type.isNull()) {
     return "null";
   } else if (type.isUndefined()) {
@@ -74,16 +83,9 @@ export function getDefaultValueForType(
     // Для union типов берем первый вариант
     const unionTypes = type.getUnionTypes();
     if (unionTypes.length > 0) {
-      return getDefaultValueForType(fieldName, unionTypes[0]);
+      return getDefaultValueForType(allExportedNames, fieldName, unionTypes[0]);
     }
     return "undefined";
-  } else if (type.isInterface() || type.isObject()) {
-    // Для вложенных интерфейсов или объектных типов
-    const interfaceName = type.getSymbol()?.getName();
-    if (interfaceName && interfaceName !== "Object") {
-      return `Get${interfaceName}()`;
-    }
-    return "{}";
   } else if (typeNode && typeNode.getKind() === SyntaxKind.TypeLiteral) {
     // Для встроенных литеральных типов
     return "{}";

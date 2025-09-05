@@ -1,11 +1,14 @@
 import {
   InterfaceDeclaration,
+  TypeAliasDeclaration,
   Project,
   ScriptTarget,
   ModuleResolutionKind,
   ModuleKind,
+  SyntaxKind,
 } from "ts-morph";
-import { getDefaultValueForType } from "./example/src/getDefaultValueForType";
+import { getDefaultValueForType } from "./src/getDefaultValueForType";
+import { getDeclarationName, getFunctionName } from "./src/names";
 
 const project = new Project({
   compilerOptions: {
@@ -23,6 +26,19 @@ console.log(project.formatDiagnosticsWithColorAndContext(diagnostics));
 
 const sourceFile = project.getSourceFileOrThrow("example.ts");
 const interfaces = sourceFile.getInterfaces();
+const types = sourceFile.getChildrenOfKind(SyntaxKind.TypeAliasDeclaration);
+
+const xxx = (s: string | undefined): s is string => Boolean(s);
+
+const allNames = interfaces
+  .map(getDeclarationName)
+  .concat(types.map(getDeclarationName))
+  .filter(xxx);
+
+const allNamesSet = new Set(allNames);
+
+console.log("---");
+console.log(allNames.join("\n"));
 
 const file = project.createSourceFile("result.ts", undefined, {
   overwrite: true,
@@ -30,7 +46,11 @@ const file = project.createSourceFile("result.ts", undefined, {
 
 for (let i of interfaces) {
   const interfaceName = i.getName();
-  const functionName = `Get${interfaceName}`;
+  if (!allNamesSet.has(interfaceName)) {
+    continue;
+  }
+
+  const functionName =  getFunctionName(interfaceName);
   const functionText = generateFunctionText(i);
 
   file.addFunction({
@@ -56,7 +76,12 @@ function generateFunctionText(
       const type = prop.getType();
       const typeNode = prop.getTypeNode();
 
-      return `${name}: ${getDefaultValueForType(name, type, typeNode)}`;
+      return `${name}: ${getDefaultValueForType(
+        allNamesSet,
+        name,
+        type,
+        typeNode
+      )}`;
     })
     .join(",\n    ");
 

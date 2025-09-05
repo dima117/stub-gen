@@ -1,14 +1,15 @@
-export function GetMi() {
+export function GetStub_Mi() {
     return {
         id: "0",
-        test: undefined
+        test: undefined,
+        int: {}
     };
 }
 
-export function GetMumumu() {
+export function GetStub_Mumumu() {
     return {
         aaa: 0,
-        mi: GetMi(),
+        mi: GetStub_Mi(),
         id: "1",
         bbb: {}
     };

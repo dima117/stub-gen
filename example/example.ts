@@ -1,7 +1,13 @@
 
+interface Internal {
+    foo: number;
+    bar: string;
+}
+
 export interface Mi {
     id: string;
     test: 111;
+    int: Internal;
 }
 
 export interface Mumumu {
