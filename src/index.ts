@@ -1,14 +1,13 @@
 import {
   InterfaceDeclaration,
-  TypeAliasDeclaration,
   Project,
   ScriptTarget,
   ModuleResolutionKind,
   ModuleKind,
   SyntaxKind,
 } from "ts-morph";
-import { getDefaultValueForType } from "./src/getDefaultValueForType";
-import { getDeclarationName, getFunctionName } from "./src/names";
+import { getDefaultValueForType } from "./getDefaultValueForType";
+import { getDeclarationName, getFunctionName } from "./names";
 
 const project = new Project({
   compilerOptions: {
@@ -18,13 +17,13 @@ const project = new Project({
   },
 });
 
-project.addSourceFilesAtPaths("example/**/*{.d.ts,.ts}");
+project.addSourceFilesAtPaths("_input.ts");
 
 const diagnostics = project.getPreEmitDiagnostics();
 
 console.log(project.formatDiagnosticsWithColorAndContext(diagnostics));
 
-const sourceFile = project.getSourceFileOrThrow("example.ts");
+const sourceFile = project.getSourceFileOrThrow("_input.ts");
 const interfaces = sourceFile.getInterfaces();
 const types = sourceFile.getChildrenOfKind(SyntaxKind.TypeAliasDeclaration);
 
@@ -40,7 +39,7 @@ const allNamesSet = new Set(allNames);
 console.log("---");
 console.log(allNames.join("\n"));
 
-const file = project.createSourceFile("result.ts", undefined, {
+const file = project.createSourceFile("_output.ts", undefined, {
   overwrite: true,
 });
 

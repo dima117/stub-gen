@@ -1,1 +1,1 @@
-export const NAME_PREFIX = 'GetStub_';
+export const NAME_PREFIX = 'GetStub';

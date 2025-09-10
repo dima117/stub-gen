@@ -1,4 +1,4 @@
-import { SyntaxKind, Type, TypeNode } from "ts-morph";
+import { SyntaxKind, ts, Type, TypeNode } from "ts-morph";
 import { getFunctionName, getSymbolName } from "./names";
 import { NAME_PREFIX } from "./const";
 
@@ -59,7 +59,7 @@ export function getDefaultValueForType(
       return `${getFunctionName(name)}()`;
     }
 
-    return "{}";
+    return getDefaultValueForObjectType(allExportedNames, type);
   } else if (type.isArray()) {
     return "[]";
   } else if (type.isNull()) {
@@ -93,4 +93,29 @@ export function getDefaultValueForType(
     // Для всех остальных типов
     return "undefined";
   }
+}
+
+export function getDefaultValueForObjectType(
+  allExportedNames: Set<string>,
+  type: Type<ts.ObjectType>
+): string {
+  const fields: string[] = [];
+
+  console.log(`обработка типа: ${type}`);
+
+  const props = type.getProperties();
+
+  for(const p of props) {
+    const name = p.getName();
+    const decl = p.getValueDeclaration();
+    const innerType = decl.getType();
+
+    console.log(`  обработка поля: ${name}: ${innerType.isUnknown()}, s: ${innerType.isString()}, n: ${innerType.isNumber()}`);
+
+    const defaultValue = getDefaultValueForType(allExportedNames, name, innerType);
+
+    fields.push(`${name}: ${defaultValue}`);
+  }
+
+  return `{${fields.join(",")}}`;
 }

@@ -4,15 +4,15 @@ interface Internal {
     bar: string;
 }
 
-export interface Mi {
+export interface Account {
     id: string;
     test: 111;
     int: Internal;
 }
 
-export interface Mumumu {
+export interface Response {
     aaa: number;
-    mi: Mi;
+    account: Account;
     id: string;
     bbb: {
         ccc?: string;
