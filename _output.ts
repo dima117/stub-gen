@@ -1,8 +1,8 @@
 export function GetStubAccount() {
     return {
         id: "0",
-        test: undefined,
-        int: { foo: 0, bar: "" }
+        test: 111,
+        int: { foo: 0, bar: "", boo: false, test: "test", testnum: 1234, testbool: false, testUnion: "one" }
     };
 }
 

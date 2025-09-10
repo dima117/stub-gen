@@ -43,7 +43,15 @@ export function getDefaultValueForType(
 ): string {
   const resolved = getDefaultValueFromSettings(fieldName);
 
-  if (type.isString()) {
+  // литеральные типы 
+  if (type.isStringLiteral() || type.isNumberLiteral()) {
+    const value = type.getLiteralValue();
+    return JSON.stringify(value);
+  } else if (type.isBooleanLiteral()) {
+    return type.getText();
+  } 
+  
+  else if (type.isString()) {
     if (resolved && typeof resolved.value !== "string") throw new Error();
     return JSON.stringify(resolved?.value || "");
   } else if (type.isNumber()) {
@@ -105,14 +113,18 @@ export function getDefaultValueForObjectType(
 
   const props = type.getProperties();
 
-  for(const p of props) {
+  for (const p of props) {
     const name = p.getName();
     const decl = p.getValueDeclaration();
     const innerType = decl.getType();
 
-    console.log(`  обработка поля: ${name}: ${innerType.isUnknown()}, s: ${innerType.isString()}, n: ${innerType.isNumber()}`);
+    console.log(`  обработка поля: ${name}`);
 
-    const defaultValue = getDefaultValueForType(allExportedNames, name, innerType);
+    const defaultValue = getDefaultValueForType(
+      allExportedNames,
+      name,
+      innerType
+    );
 
     fields.push(`${name}: ${defaultValue}`);
   }

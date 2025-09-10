@@ -2,6 +2,11 @@
 interface Internal {
     foo: number;
     bar: string;
+    boo: boolean;
+    test: 'test';
+    testnum: 1234;
+    testbool: false;
+    testUnion: 'one' | 'two' | 'three';
 }
 
 export interface Account {
